@@ -1,0 +1,14 @@
+database: almanac-go
+server:
+  host: localhost
+  port: 3000
+jwt:
+  expiration: 900
+refreshToken:
+  length: 32
+  maxAge: 86400
+argon2:
+  type: argon2.argon2id
+  memoryCost: 47104
+  timeCost: 2
+  parallelism: 1
