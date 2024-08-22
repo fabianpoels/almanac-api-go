@@ -27,12 +27,18 @@ func NewRouter() *gin.Engine {
 	router.Use(cors.New(config))
 
 	auth := new(controllers.AuthController)
+	public := new(controllers.PublicController)
 	// user := new(controllers.UserController)
 
 	api := router.Group("api")
 	{
 		v1 := api.Group("v1")
 		{
+			// public routes
+			v1.GET("/newsItems", public.NewsItems)
+			v1.GET("/categories", public.Categories)
+
+			// auth
 			v1.POST("/auth/login", auth.Login)
 			v1.POST("/auth/refresh-token", auth.RefreshToken)
 			v1.Use(middleware.ValidateJwt())
