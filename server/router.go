@@ -43,7 +43,7 @@ func NewRouter() *gin.Engine {
 			v1.POST("/auth/refresh-token", auth.RefreshToken)
 			v1.Use(middleware.ValidateJwt())
 			{
-				// v1.GET("workspaces", user.Workspaces)
+
 			}
 		}
 	}
