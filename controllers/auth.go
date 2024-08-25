@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -10,6 +11,7 @@ import (
 
 	"almanac-api/config"
 	"almanac-api/db"
+	"almanac-api/middleware"
 	"almanac-api/models"
 	"almanac-api/utils"
 )
@@ -63,8 +65,8 @@ func (a AuthController) Login(c *gin.Context) {
 	refresh := utils.GenerateRefreshTokenString()
 
 	// store refresh token and reverse in cache
-	err1 := cacheClient.Do(c, cacheClient.B().Set().Key(refresh).Value(user.Id.Hex()).Nx().ExSeconds(int64(maxAge)).Build()).Error()
-	err2 := cacheClient.Do(c, cacheClient.B().Set().Key(user.Id.Hex()).Value(refresh).Nx().ExSeconds(int64(maxAge)).Build()).Error()
+	err1 := cacheClient.Do(c, cacheClient.B().Set().Key(refresh).Value(user.Id.String()).Nx().ExSeconds(int64(maxAge)).Build()).Error()
+	err2 := cacheClient.Do(c, cacheClient.B().Set().Key(user.Id.String()).Value(refresh).Nx().ExSeconds(int64(maxAge)).Build()).Error()
 
 	if err1 != nil || err2 != nil {
 		c.JSON(http.StatusUnauthorized, "error")
@@ -119,6 +121,40 @@ func (a AuthController) RefreshToken(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"user": user, "jwt": jwtToken})
+}
+
+func (a AuthController) Logout(c *gin.Context) {
+	cacheClient := db.GetCacheClient()
+	user, exists := middleware.GetUserFromContext(c)
+	if !exists {
+		log.Println("/logout without logged in user")
+		c.JSON(http.StatusOK, "")
+		return
+	}
+
+	refreshTokenString, err := cacheClient.Do(c, cacheClient.B().Get().Key(user.Id.String()).Build()).ToString()
+	if err != nil {
+		log.Printf("/logout user id not found in cache: %s", user.Id.String())
+		c.JSON(http.StatusOK, "")
+		return
+	}
+
+	err = cacheClient.Do(c, cacheClient.B().Del().Key(user.Id.String()).Build()).Error()
+	if err != nil {
+		log.Printf("/logout error deleting user id from cache: %s", user.Id.String())
+		c.JSON(http.StatusOK, "")
+		return
+	}
+
+	err = cacheClient.Do(c, cacheClient.B().Del().Key(refreshTokenString).Build()).Error()
+	if err != nil {
+		log.Printf("/logout error deleting refreshtoken from cache: %s", refreshTokenString)
+		c.JSON(http.StatusOK, "")
+		return
+	}
+
+	c.SetCookie(cookieName, "", -1, "/", "localhost", false, true)
+	c.JSON(http.StatusOK, gin.H{})
 }
 
 // func (a AuthController) Register(c *gin.Context) {

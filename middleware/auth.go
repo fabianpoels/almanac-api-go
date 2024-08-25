@@ -1,10 +1,8 @@
 package middleware
 
 import (
-	"context"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -35,16 +33,24 @@ func ValidateJwt() gin.HandlerFunc {
 		email := claims["email"]
 
 		// look up the user
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
 		var user models.User
-		err = models.GetUserCollection(*mongoClient).FindOne(ctx, bson.D{{Key: "email", Value: email}}).Decode(&user)
+		err = models.GetUserCollection(*mongoClient).FindOne(c, bson.D{{Key: "email", Value: email}}).Decode(&user)
 		if err != nil {
 			log.Println(err)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "user not found"})
 			return
 		}
+
 		c.Set("user", user)
 		c.Next()
 	}
+}
+
+func GetUserFromContext(c *gin.Context) (models.User, bool) {
+	userInterface, exists := c.Get("user")
+	if !exists {
+		return models.User{}, false
+	}
+	user, ok := userInterface.(models.User)
+	return user, ok
 }

@@ -41,6 +41,7 @@ func NewRouter() *gin.Engine {
 			// auth
 			v1.POST("/auth/login", auth.Login)
 			v1.POST("/auth/refresh-token", auth.RefreshToken)
+			v1.POST("/auth/logout", middleware.ValidateJwt(), auth.Logout)
 			v1.Use(middleware.ValidateJwt())
 			{
 
