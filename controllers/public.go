@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type PublicController struct {
@@ -14,7 +15,9 @@ type PublicController struct {
 
 func (p PublicController) NewsItems(c *gin.Context) {
 	mongoClient := db.GetDbClient()
-	cur, err := models.GetNewsItemCollection(*mongoClient).Find(c, bson.M{})
+	filter := bson.D{{"status", "published"}}
+	opts := options.Find().SetSort(bson.D{{"createdAt", -1}})
+	cur, err := models.GetNewsItemCollection(*mongoClient).Find(c, filter, opts)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -33,7 +36,8 @@ func (p PublicController) NewsItems(c *gin.Context) {
 
 func (p PublicController) Categories(c *gin.Context) {
 	mongoClient := db.GetDbClient()
-	cur, err := models.GetCategoryCollection(*mongoClient).Find(c, bson.M{})
+	filter := bson.D{{"active", true}}
+	cur, err := models.GetCategoryCollection(*mongoClient).Find(c, filter)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
