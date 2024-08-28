@@ -39,6 +39,7 @@ func (a AuthController) Login(c *gin.Context) {
 	var user models.User
 	err := models.GetUserCollection(*mongoClient).FindOne(c, bson.D{{Key: "email", Value: userLogin.Email}}).Decode(&user)
 	if err != nil {
+		log.Printf("LOGIN ERROR: user not found by email (%s)", userLogin.Email)
 		c.JSON(http.StatusUnauthorized, "error")
 		return
 	}
@@ -46,13 +47,15 @@ func (a AuthController) Login(c *gin.Context) {
 	match, err := utils.VerifyPasswordHash(userLogin.Password, user.Password)
 
 	if !match || err != nil {
+		log.Printf("LOGIN ERROR: password doesn't match for user (%s)", userLogin.Email)
 		c.JSON(http.StatusUnauthorized, "error")
 		return
 	}
 
 	jwtToken, err := utils.GenerateJwt(user)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		log.Printf("LOGIN ERROR: error generating JWT for user (%s)", userLogin.Email)
+		c.JSON(http.StatusUnauthorized, "error")
 		return
 	}
 
@@ -65,8 +68,8 @@ func (a AuthController) Login(c *gin.Context) {
 	refresh := utils.GenerateRefreshTokenString()
 
 	// store refresh token and reverse in cache
-	err1 := cacheClient.Do(c, cacheClient.B().Set().Key(refresh).Value(user.Id.String()).Nx().ExSeconds(int64(maxAge)).Build()).Error()
-	err2 := cacheClient.Do(c, cacheClient.B().Set().Key(user.Id.String()).Value(refresh).Nx().ExSeconds(int64(maxAge)).Build()).Error()
+	err1 := cacheClient.Do(c, cacheClient.B().Set().Key(refresh).Value(user.Id.Hex()).Nx().ExSeconds(int64(maxAge)).Build()).Error()
+	err2 := cacheClient.Do(c, cacheClient.B().Set().Key(user.Id.Hex()).Value(refresh).Nx().ExSeconds(int64(maxAge)).Build()).Error()
 
 	if err1 != nil || err2 != nil {
 		c.JSON(http.StatusUnauthorized, "error")
@@ -132,16 +135,16 @@ func (a AuthController) Logout(c *gin.Context) {
 		return
 	}
 
-	refreshTokenString, err := cacheClient.Do(c, cacheClient.B().Get().Key(user.Id.String()).Build()).ToString()
+	refreshTokenString, err := cacheClient.Do(c, cacheClient.B().Get().Key(user.Id.Hex()).Build()).ToString()
 	if err != nil {
-		log.Printf("/logout user id not found in cache: %s", user.Id.String())
+		log.Printf("/logout user id not found in cache: %s", user.Id.Hex())
 		c.JSON(http.StatusOK, "")
 		return
 	}
 
-	err = cacheClient.Do(c, cacheClient.B().Del().Key(user.Id.String()).Build()).Error()
+	err = cacheClient.Do(c, cacheClient.B().Del().Key(user.Id.Hex()).Build()).Error()
 	if err != nil {
-		log.Printf("/logout error deleting user id from cache: %s", user.Id.String())
+		log.Printf("/logout error deleting user id from cache: %s", user.Id.Hex())
 		c.JSON(http.StatusOK, "")
 		return
 	}

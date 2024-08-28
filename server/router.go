@@ -2,6 +2,7 @@ package server
 
 import (
 	"almanac-api/controllers"
+	"almanac-api/controllers/admin"
 	"almanac-api/middleware"
 	"time"
 
@@ -28,14 +29,16 @@ func NewRouter() *gin.Engine {
 
 	auth := new(controllers.AuthController)
 	public := new(controllers.PublicController)
-	// user := new(controllers.UserController)
+
+	// ADMIN CONTROLLERS
+	newsItems := new(admin.NewsItemsController)
 
 	api := router.Group("api")
 	{
 		v1 := api.Group("v1")
 		{
 			// public routes
-			v1.GET("/newsItems", public.NewsItems)
+			v1.GET("/news", public.NewsItems)
 			v1.GET("/categories", public.Categories)
 
 			// auth
@@ -44,7 +47,21 @@ func NewRouter() *gin.Engine {
 			v1.POST("/auth/logout", middleware.ValidateJwt(), auth.Logout)
 			v1.Use(middleware.ValidateJwt())
 			{
+				// LOGGED IN ROUTES
 
+				// ADMIN ROUTES
+				admin := v1.Group("a")
+				{
+					admin.Use(middleware.ValidateAdmin())
+					{
+						news := admin.Group("news")
+						{
+							news.GET("", newsItems.List)
+							// news.PATCH("/newsItem", newsItems.Patch)
+
+						}
+					}
+				}
 			}
 		}
 	}

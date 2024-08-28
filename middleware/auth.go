@@ -46,6 +46,17 @@ func ValidateJwt() gin.HandlerFunc {
 	}
 }
 
+func ValidateAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user, ok := GetUserFromContext(c)
+		if !ok || !user.IsAdmin() {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Unauthorized": "Not admin"})
+			return
+		}
+		c.Next()
+	}
+}
+
 func GetUserFromContext(c *gin.Context) (models.User, bool) {
 	userInterface, exists := c.Get("user")
 	if !exists {

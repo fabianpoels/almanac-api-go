@@ -18,6 +18,7 @@ type NewsItem struct {
 	GeoData     map[string]interface{} `json:"geoData" bson:"geoData"`
 	Link        TranslatedField        `json:"link" bson:"link"`
 	Source      string                 `json:"source" bson:"source"`
+	Provider    string                 `json:"provider" bson:"provider"`
 	Timestamp   time.Time              `json:"timestamp" bson:"timestamp"`
 	CreatedAt   time.Time              `json:"-" bson:"createdAt,omitempty"`
 	UpdatedAt   time.Time              `json:"-" bson:"updatedAt,omitempty"`
