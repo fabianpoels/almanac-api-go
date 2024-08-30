@@ -43,6 +43,8 @@ func dataseed() {
 		Email:     "fabian@fabianpoels.com",
 		Password:  passw,
 		Name:      "Fabian",
+		Active:    true,
+		Role:      "superadmin",
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
@@ -53,43 +55,43 @@ func dataseed() {
 	log.Println(res)
 
 	// create categories
-	categories := []interface{}{
-		models.Category{
-			Key:    "red_zone",
-			Color:  "#f44336",
-			Icon:   "report",
-			Active: true,
-		},
-		models.Category{
-			Key:    "traffic_incident",
-			Color:  "#ff9100",
-			Icon:   "car_crash",
-			Active: true,
-		},
+	// categories := []interface{}{
+	// 	models.Category{
+	// 		Key:    "red_zone",
+	// 		Color:  "#f44336",
+	// 		Icon:   "report",
+	// 		Active: true,
+	// 	},
+	// 	models.Category{
+	// 		Key:    "traffic_incident",
+	// 		Color:  "#ff9100",
+	// 		Icon:   "car_crash",
+	// 		Active: true,
+	// 	},
 
-		models.Category{
-			Key:    "protest",
-			Color:  "#cddc39",
-			Icon:   "groups",
-			Active: true,
-		},
-		models.Category{
-			Key:    "military",
-			Color:  "#cddc39",
-			Icon:   "radar",
-			Active: true,
-		},
-		models.Category{
-			Key:    "weather",
-			Color:  "#cddc39",
-			Icon:   "thunderstorm",
-			Active: true,
-		},
-	}
+	// 	models.Category{
+	// 		Key:    "protest",
+	// 		Color:  "#cddc39",
+	// 		Icon:   "groups",
+	// 		Active: true,
+	// 	},
+	// 	models.Category{
+	// 		Key:    "military",
+	// 		Color:  "#cddc39",
+	// 		Icon:   "radar",
+	// 		Active: true,
+	// 	},
+	// 	models.Category{
+	// 		Key:    "weather",
+	// 		Color:  "#cddc39",
+	// 		Icon:   "thunderstorm",
+	// 		Active: true,
+	// 	},
+	// }
 
-	ress, err := models.GetCategoryCollection(*db.GetDbClient()).InsertMany(context.Background(), categories)
-	if err != nil {
-		panic(err)
-	}
-	log.Println(ress)
+	// ress, err := models.GetCategoryCollection(*db.GetDbClient()).InsertMany(context.Background(), categories)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// log.Println(ress)
 }

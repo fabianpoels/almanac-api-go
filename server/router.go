@@ -1,6 +1,7 @@
 package server
 
 import (
+	"almanac-api/config"
 	"almanac-api/controllers"
 	"almanac-api/controllers/admin"
 	"almanac-api/middleware"
@@ -17,15 +18,30 @@ func NewRouter() *gin.Engine {
 
 	// FOR DEV PURPOSES!!!!
 	// TODO: rework to dynamically configure cors, depending on the env
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:9000", "http://127.0.0.1:9000"}
-	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Accept", "User-Agent", "Cache-Control"}
-	config.AllowMethods = []string{"POST", "GET", "PUT", "OPTIONS"}
-	config.ExposeHeaders = []string{"Content-Length"}
-	config.AllowCredentials = true
-	config.MaxAge = 12 * time.Hour
+	corsConfig := cors.DefaultConfig()
 
-	router.Use(cors.New(config))
+	if config.GetEnv("ENVIRONMENT") == "dev" {
+		// LOCAL DEV CONFIG
+		router.SetTrustedProxies(nil)
+		corsConfig.AllowOrigins = []string{"http://localhost:9000", "http://127.0.0.1:9000"}
+		corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Accept", "User-Agent", "Cache-Control"}
+		corsConfig.AllowMethods = []string{"POST", "GET", "PUT", "OPTIONS"}
+		corsConfig.ExposeHeaders = []string{"Content-Length"}
+		corsConfig.AllowCredentials = true
+		corsConfig.MaxAge = 12 * time.Hour
+	} else {
+		gin.SetMode("release")
+		domain := config.GetEnv("DOMAIN")
+		router.SetTrustedProxies(nil)
+		corsConfig.AllowOrigins = []string{domain}
+		corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Accept", "User-Agent", "Cache-Control"}
+		corsConfig.AllowMethods = []string{"POST", "GET", "PUT", "OPTIONS"}
+		corsConfig.ExposeHeaders = []string{"Content-Length"}
+		corsConfig.AllowCredentials = true
+		corsConfig.MaxAge = 12 * time.Hour
+	}
+
+	router.Use(cors.New(corsConfig))
 
 	auth := new(controllers.AuthController)
 	public := new(controllers.PublicController)
