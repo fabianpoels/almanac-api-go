@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -68,8 +69,8 @@ func (a AuthController) Login(c *gin.Context) {
 	refresh := utils.GenerateRefreshTokenString()
 
 	// store refresh token and reverse in cache
-	err1 := cacheClient.Do(c, cacheClient.B().Set().Key(refresh).Value(user.Id.Hex()).Nx().ExSeconds(int64(maxAge)).Build()).Error()
-	err2 := cacheClient.Do(c, cacheClient.B().Set().Key(user.Id.Hex()).Value(refresh).Nx().ExSeconds(int64(maxAge)).Build()).Error()
+	err1 := cacheClient.Set(c, refresh, user.Id.Hex(), time.Duration(maxAge)).Err()
+	err2 := cacheClient.Set(c, user.Id.Hex(), refresh, time.Duration(maxAge)).Err()
 
 	if err1 != nil || err2 != nil {
 		c.JSON(http.StatusUnauthorized, "error")
@@ -95,7 +96,7 @@ func (a AuthController) RefreshToken(c *gin.Context) {
 	}
 
 	// get the user id from the cache
-	idString, err := cacheClient.Do(c, cacheClient.B().Get().Key(cookie).Build()).ToString()
+	idString, err := cacheClient.Get(c, cookie).Result()
 
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
@@ -135,21 +136,21 @@ func (a AuthController) Logout(c *gin.Context) {
 		return
 	}
 
-	refreshTokenString, err := cacheClient.Do(c, cacheClient.B().Get().Key(user.Id.Hex()).Build()).ToString()
+	refreshTokenString, err := cacheClient.Get(c, user.Id.Hex()).Result()
 	if err != nil {
 		log.Printf("/logout user id not found in cache: %s", user.Id.Hex())
 		c.JSON(http.StatusOK, "")
 		return
 	}
 
-	err = cacheClient.Do(c, cacheClient.B().Del().Key(user.Id.Hex()).Build()).Error()
+	_, err = cacheClient.Del(c, user.Id.Hex()).Result()
 	if err != nil {
 		log.Printf("/logout error deleting user id from cache: %s", user.Id.Hex())
 		c.JSON(http.StatusOK, "")
 		return
 	}
 
-	err = cacheClient.Do(c, cacheClient.B().Del().Key(refreshTokenString).Build()).Error()
+	_, err = cacheClient.Del(c, refreshTokenString).Result()
 	if err != nil {
 		log.Printf("/logout error deleting refreshtoken from cache: %s", refreshTokenString)
 		c.JSON(http.StatusOK, "")
