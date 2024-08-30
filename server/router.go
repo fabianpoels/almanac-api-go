@@ -30,7 +30,6 @@ func NewRouter() *gin.Engine {
 		corsConfig.AllowCredentials = true
 		corsConfig.MaxAge = 12 * time.Hour
 	} else {
-		gin.SetMode("release")
 		domain := config.GetEnv("DOMAIN")
 		router.SetTrustedProxies(nil)
 		corsConfig.AllowOrigins = []string{domain}

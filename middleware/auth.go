@@ -3,6 +3,7 @@ package middleware
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -13,13 +14,32 @@ import (
 	"almanac-api/utils"
 )
 
+type authHeader struct {
+	IDToken string `header:"Authorization"`
+}
+
 func ValidateJwt() gin.HandlerFunc {
 	// load non-request based stuff
 	var mongoClient = db.GetDbClient()
 
 	return func(c *gin.Context) {
+		h := authHeader{}
+		err := c.ShouldBindHeader(&h)
+
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "No token provided"})
+			return
+		}
+
+		idTokenHeader := strings.Split(h.IDToken, "Bearer ")
+
+		if len(idTokenHeader) < 2 {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "No token provided"})
+			return
+		}
+
 		// validate the JWT and read the user _id
-		tokenString := c.GetHeader("Authorization")[len("Bearer "):]
+		tokenString := idTokenHeader[1]
 		token, err := utils.ParseJwt(tokenString)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "Token invalid"})

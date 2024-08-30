@@ -69,8 +69,8 @@ func (a AuthController) Login(c *gin.Context) {
 	refresh := utils.GenerateRefreshTokenString()
 
 	// store refresh token and reverse in cache
-	err1 := cacheClient.Set(c, refresh, user.Id.Hex(), time.Duration(maxAge)).Err()
-	err2 := cacheClient.Set(c, user.Id.Hex(), refresh, time.Duration(maxAge)).Err()
+	err1 := cacheClient.Set(c, refresh, user.Id.Hex(), time.Duration(maxAge)*time.Second).Err()
+	err2 := cacheClient.Set(c, user.Id.Hex(), refresh, time.Duration(maxAge)*time.Second).Err()
 
 	if err1 != nil || err2 != nil {
 		c.JSON(http.StatusUnauthorized, "error")
