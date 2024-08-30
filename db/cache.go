@@ -23,6 +23,7 @@ func CacheConnect() {
 	host := config.GetEnv("REDIS_HOST")
 	port := config.GetEnv("REDIS_PORT")
 
+	log.Printf("Connecting to redis client at: %s", fmt.Sprintf("%s:%s", host, port))
 	client := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", host, port),
 		Password: "", // no password set
