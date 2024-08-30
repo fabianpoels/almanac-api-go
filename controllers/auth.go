@@ -79,7 +79,7 @@ func (a AuthController) Login(c *gin.Context) {
 
 	// TODO: properly configure the cookie
 	c.SetSameSite(http.SameSiteStrictMode)
-	c.SetCookie(cookieName, refresh, maxAge, "/", "localhost", false, true)
+	c.SetCookie(cookieName, refresh, maxAge, "/", config.GetEnv("DOMAIN"), false, true)
 	c.JSON(http.StatusOK, gin.H{"user": user, "jwt": jwtToken})
 }
 
@@ -157,7 +157,7 @@ func (a AuthController) Logout(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie(cookieName, "", -1, "/", "localhost", false, true)
+	c.SetCookie(cookieName, "", -1, "/", config.GetEnv("DOMAIN"), false, true)
 	c.JSON(http.StatusOK, gin.H{})
 }
 

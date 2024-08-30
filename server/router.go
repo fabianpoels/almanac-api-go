@@ -5,6 +5,7 @@ import (
 	"almanac-api/controllers"
 	"almanac-api/controllers/admin"
 	"almanac-api/middleware"
+	"fmt"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -22,6 +23,7 @@ func NewRouter() *gin.Engine {
 
 	if config.GetEnv("ENVIRONMENT") == "dev" {
 		// LOCAL DEV CONFIG
+		// domain := config.GetEnv("DOMAIN")
 		router.SetTrustedProxies(nil)
 		corsConfig.AllowOrigins = []string{"http://localhost:9000", "http://127.0.0.1:9000"}
 		corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Accept", "User-Agent", "Cache-Control"}
@@ -32,7 +34,7 @@ func NewRouter() *gin.Engine {
 	} else {
 		domain := config.GetEnv("DOMAIN")
 		router.SetTrustedProxies(nil)
-		corsConfig.AllowOrigins = []string{domain}
+		corsConfig.AllowOrigins = []string{fmt.Sprintf("http://%s", domain)}
 		corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Accept", "User-Agent", "Cache-Control"}
 		corsConfig.AllowMethods = []string{"POST", "GET", "PUT", "OPTIONS"}
 		corsConfig.ExposeHeaders = []string{"Content-Length"}
