@@ -74,7 +74,7 @@ func NewRouter() *gin.Engine {
 						news := admin.Group("news")
 						{
 							news.GET("", newsItems.List)
-							// news.PATCH("/newsItem", newsItems.Patch)
+							news.PUT("/:id", newsItems.Update)
 
 						}
 					}
