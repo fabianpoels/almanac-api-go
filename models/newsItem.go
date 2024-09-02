@@ -16,6 +16,7 @@ type NewsItem struct {
 	Status      string                 `json:"status" bson:"status" validate:"required,alpha"`
 	User        primitive.ObjectID     `json:"user,omitempty" bson:"user,omitempty"`
 	GeoData     map[string]interface{} `json:"geoData" bson:"geoData"`
+	Location    string                 `json:"location" bson:"location"`
 	Link        TranslatedField        `json:"link" bson:"link"`
 	Source      string                 `json:"source" bson:"source"`
 	Provider    string                 `json:"provider" bson:"provider"`
