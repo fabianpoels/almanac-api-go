@@ -4,9 +4,11 @@ import (
 	"almanac-api/db"
 	"almanac-api/models"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -15,7 +17,12 @@ type PublicController struct {
 
 func (p PublicController) NewsItems(c *gin.Context) {
 	mongoClient := db.GetDbClient()
-	filter := bson.D{{"status", "published"}}
+	twoDaysAgo := primitive.NewDateTimeFromTime(time.Now().AddDate(0, 0, -2))
+	filter := bson.M{
+		"createdAt": bson.M{"$gte": twoDaysAgo},
+		"status":    "published",
+	}
+
 	opts := options.Find().SetSort(bson.D{{"createdAt", -1}})
 	cur, err := models.GetNewsItemCollection(*mongoClient).Find(c, filter, opts)
 
