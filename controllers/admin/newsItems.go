@@ -52,7 +52,7 @@ func (n NewsItemsController) Update(c *gin.Context) {
 		return
 	}
 
-	update := bson.M{"status": updateNewsItem.Status, "updatedAt": time.Now()}
+	update := bson.M{"status": updateNewsItem.Status, "geoData": updateNewsItem.GeoData, "updatedAt": time.Now()}
 	result, err := models.GetNewsItemCollection(*mongoClient).UpdateOne(c, bson.M{"_id": objId}, bson.M{"$set": update})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
