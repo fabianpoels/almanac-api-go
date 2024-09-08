@@ -56,6 +56,7 @@ func (n NewsItemsController) Update(c *gin.Context) {
 		"title":       updateNewsItem.Title,
 		"description": updateNewsItem.Description,
 		"status":      updateNewsItem.Status,
+		"category":    updateNewsItem.Category,
 		"geoData":     updateNewsItem.GeoData,
 		"timestamp":   updateNewsItem.Timestamp,
 		"updatedAt":   time.Now(),
