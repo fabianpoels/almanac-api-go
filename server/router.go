@@ -74,8 +74,8 @@ func NewRouter() *gin.Engine {
 						news := admin.Group("news")
 						{
 							news.GET("", newsItems.List)
+							news.POST("", newsItems.Create)
 							news.PUT("/:id", newsItems.Update)
-
 						}
 					}
 				}

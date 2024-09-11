@@ -2,6 +2,7 @@ package admin
 
 import (
 	"almanac-api/db"
+	"almanac-api/middleware"
 	"almanac-api/models"
 	"net/http"
 	"time"
@@ -33,6 +34,43 @@ func (n NewsItemsController) List(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, newsItems)
+}
+
+func (n NewsItemsController) Create(c *gin.Context) {
+	mongoClient := db.GetDbClient()
+
+	user, ok := middleware.GetUserFromContext(c)
+	if !ok || !user.IsAdmin() {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Unauthorized": "Not admin"})
+		return
+	}
+
+	var newsItem models.NewsItem
+	err := c.BindJSON(&newsItem)
+	if err != nil {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	newsItem.CreatedAt = time.Now()
+	newsItem.UpdatedAt = time.Now()
+	newsItem.User = user.Id
+	newsItem.Provider = "manual"
+
+	result, err := models.GetNewsItemCollection(*mongoClient).InsertOne(c, newsItem)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var createdNewsItem models.NewsItem
+	err = models.GetNewsItemCollection(*mongoClient).FindOne(c, bson.D{{"_id", result.InsertedID}}).Decode(&createdNewsItem)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusCreated, createdNewsItem)
 }
 
 func (n NewsItemsController) Update(c *gin.Context) {
