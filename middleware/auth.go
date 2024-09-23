@@ -7,10 +7,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"gitlab.com/almanac-app/models"
 	"go.mongodb.org/mongo-driver/bson"
 
+	"almanac-api/collections"
 	"almanac-api/db"
-	"almanac-api/models"
 	"almanac-api/utils"
 )
 
@@ -54,7 +55,7 @@ func ValidateJwt() gin.HandlerFunc {
 
 		// look up the user
 		var user models.User
-		err = models.GetUserCollection(*mongoClient).FindOne(c, bson.D{{Key: "email", Value: email}}).Decode(&user)
+		err = collections.GetUserCollection(*mongoClient).FindOne(c, bson.D{{Key: "email", Value: email}}).Decode(&user)
 		if err != nil {
 			log.Println(err)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Message": "user not found"})

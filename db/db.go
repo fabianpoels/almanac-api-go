@@ -1,8 +1,8 @@
 package db
 
 import (
+	"almanac-api/collections"
 	"almanac-api/config"
-	"almanac-api/models"
 	"context"
 	"fmt"
 	"log"
@@ -59,7 +59,7 @@ func DbConnect() {
 		Keys:    bson.D{{Key: "email", Value: 1}},
 		Options: options.Index().SetUnique(true),
 	}
-	name, err := models.GetUserCollection(*client).Indexes().CreateOne(ctx, userEmailIndex)
+	name, err := collections.GetUserCollection(*client).Indexes().CreateOne(ctx, userEmailIndex)
 	if err != nil {
 		log.Fatal("⛒ Error creating User email index")
 		log.Fatal(err)
@@ -71,7 +71,7 @@ func DbConnect() {
 		Keys:    bson.D{{Key: "key", Value: 1}},
 		Options: options.Index().SetUnique(true),
 	}
-	cat, err := models.GetCategoryCollection(*client).Indexes().CreateOne(ctx, categoryKeyIndex)
+	cat, err := collections.GetCategoryCollection(*client).Indexes().CreateOne(ctx, categoryKeyIndex)
 	if err != nil {
 		log.Fatal("⛒ Error creating User email index")
 		log.Fatal(err)

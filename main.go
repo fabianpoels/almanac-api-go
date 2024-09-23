@@ -8,11 +8,13 @@ import (
 	"os"
 	"time"
 
+	"almanac-api/collections"
 	"almanac-api/config"
 	"almanac-api/db"
-	"almanac-api/models"
 	"almanac-api/server"
 	"almanac-api/utils"
+
+	"gitlab.com/almanac-app/models"
 )
 
 func main() {
@@ -48,7 +50,7 @@ func dataseed() {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-	res, err := models.GetUserCollection(*db.GetDbClient()).InsertOne(context.Background(), fabian)
+	res, err := collections.GetUserCollection(*db.GetDbClient()).InsertOne(context.Background(), fabian)
 	if err != nil {
 		panic(err)
 	}

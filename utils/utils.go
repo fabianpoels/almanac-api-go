@@ -11,10 +11,10 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"gitlab.com/almanac-app/models"
 	"golang.org/x/crypto/argon2"
 
 	"almanac-api/config"
-	"almanac-api/models"
 )
 
 type customUserClaims struct {

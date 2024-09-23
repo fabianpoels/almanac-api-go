@@ -1,13 +1,14 @@
 package admin
 
 import (
+	"almanac-api/collections"
 	"almanac-api/db"
 	"almanac-api/middleware"
-	"almanac-api/models"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"gitlab.com/almanac-app/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -19,7 +20,7 @@ type NewsItemsController struct {
 func (n NewsItemsController) List(c *gin.Context) {
 	mongoClient := db.GetDbClient()
 	opts := options.Find().SetSort(bson.D{{"createdAt", -1}})
-	cur, err := models.GetNewsItemCollection(*mongoClient).Find(c, bson.D{{}}, opts)
+	cur, err := collections.GetNewsItemCollection(*mongoClient).Find(c, bson.D{{}}, opts)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -57,14 +58,14 @@ func (n NewsItemsController) Create(c *gin.Context) {
 	newsItem.User = user.Id
 	newsItem.Provider = "manual"
 
-	result, err := models.GetNewsItemCollection(*mongoClient).InsertOne(c, newsItem)
+	result, err := collections.GetNewsItemCollection(*mongoClient).InsertOne(c, newsItem)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	var createdNewsItem models.NewsItem
-	err = models.GetNewsItemCollection(*mongoClient).FindOne(c, bson.D{{"_id", result.InsertedID}}).Decode(&createdNewsItem)
+	err = collections.GetNewsItemCollection(*mongoClient).FindOne(c, bson.D{{"_id", result.InsertedID}}).Decode(&createdNewsItem)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
@@ -99,7 +100,7 @@ func (n NewsItemsController) Update(c *gin.Context) {
 		"timestamp":   updateNewsItem.Timestamp,
 		"updatedAt":   time.Now(),
 	}
-	result, err := models.GetNewsItemCollection(*mongoClient).UpdateOne(c, bson.M{"_id": objId}, bson.M{"$set": update})
+	result, err := collections.GetNewsItemCollection(*mongoClient).UpdateOne(c, bson.M{"_id": objId}, bson.M{"$set": update})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
@@ -111,7 +112,7 @@ func (n NewsItemsController) Update(c *gin.Context) {
 	}
 
 	var newsItem models.NewsItem
-	err = models.GetNewsItemCollection(*mongoClient).FindOne(c, bson.D{{"_id", objId}}).Decode(&newsItem)
+	err = collections.GetNewsItemCollection(*mongoClient).FindOne(c, bson.D{{"_id", objId}}).Decode(&newsItem)
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "newsitem not found"})
