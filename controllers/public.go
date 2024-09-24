@@ -24,7 +24,7 @@ func (p PublicController) NewsItems(c *gin.Context) {
 		"status":    "published",
 	}
 
-	opts := options.Find().SetSort(bson.D{{"createdAt", -1}})
+	opts := options.Find().SetSort(bson.D{{"timestamp", -1}})
 	cur, err := collections.GetNewsItemCollection(*mongoClient).Find(c, filter, opts)
 
 	if err != nil {
