@@ -20,7 +20,7 @@ require (
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
-	gitlab.com/almanac-app/models v0.0.0-20240923213228-b1a3b76743ea // indirect
+	gitlab.com/almanac-app/models v0.0.0-20240925152943-6c978f5338a6 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 )
 
