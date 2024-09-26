@@ -21,7 +21,7 @@ func NewRouter() *gin.Engine {
 	// TODO: rework to dynamically configure cors, depending on the env
 	corsConfig := cors.DefaultConfig()
 
-	if config.GetEnv("ENVIRONMENT") == "dev" {
+	if config.GetEnv("ENVIRONMENT") == "development" {
 		// LOCAL DEV CONFIG
 		// domain := config.GetEnv("DOMAIN")
 		router.SetTrustedProxies(nil)
