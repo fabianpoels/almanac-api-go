@@ -18,4 +18,4 @@ Thumbs.db
 # config
 .env
 local.env
-config/development.yml⏎   
+config/*.yml

@@ -51,7 +51,7 @@ func DbConnect() {
 		log.Fatal(err)
 	}
 
-	log.Println("Connected to database")
+	log.Println("Connected to database: " + config.GetConfig().GetString("database"))
 
 	// (re) create indexes
 	// USER INDEXES

@@ -18,7 +18,9 @@ import (
 )
 
 func main() {
-	environment := flag.String("e", "development", "")
+	env := config.GetEnv("ENVIRONMENT")
+
+	environment := flag.String("e", env, "")
 	flag.Usage = func() {
 		fmt.Println("Usage: server -e {mode}")
 		os.Exit(1)
