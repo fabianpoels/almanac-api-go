@@ -154,3 +154,21 @@ func GenerateRefreshTokenString() string {
 	}
 	return base64.StdEncoding.EncodeToString(b)
 }
+
+func GetStartOfWeek() time.Time {
+	now := time.Now()
+	weekday := now.Weekday()
+
+	if weekday == time.Sunday {
+		weekday = 7
+	} else {
+		weekday -= 1
+	}
+
+	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).AddDate(0, 0, -int(weekday))
+}
+
+func GetStartOfMonth() time.Time {
+	now := time.Now()
+	return time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+}

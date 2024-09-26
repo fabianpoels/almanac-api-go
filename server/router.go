@@ -55,7 +55,7 @@ func NewRouter() *gin.Engine {
 		v1 := api.Group("v1")
 		{
 			// public routes
-			v1.GET("/news", public.NewsItems)
+			v1.POST("/news", public.NewsItems)
 			v1.GET("/categories", public.Categories)
 
 			// auth
