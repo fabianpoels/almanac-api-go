@@ -67,7 +67,7 @@ func NewRouter() *gin.Engine {
 				// LOGGED IN ROUTES
 
 				// ADMIN ROUTES
-				admin := v1.Group("a")
+				admin := v1.Group("admin")
 				{
 					admin.Use(middleware.ValidateAdmin())
 					{

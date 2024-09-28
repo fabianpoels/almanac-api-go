@@ -129,8 +129,6 @@ github.com/xdg-go/stringprep v1.0.4/go.mod h1:mPGuuIYwz7CmR2bT9j4GbQqutWS1zV24gi
 github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 h1:ilQV1hzziu+LLM3zUTJ0trRztfwgjqKnBWNtSRkbmwM=
 github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78/go.mod h1:aL8wCCfTfSfmXjznFBSZNN13rSJjlIOI1fUNAtF7rmI=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
-gitlab.com/almanac-app/models v0.0.0-20240923213228-b1a3b76743ea h1:zV93TukAMM58nFPQBFTY5wUqNSLzXonITbxSBo1FisA=
-gitlab.com/almanac-app/models v0.0.0-20240923213228-b1a3b76743ea/go.mod h1:m/XStx0gaGrFSCLyVoxUCp+0F3ffZAgNtqyzn6h3Ov0=
 gitlab.com/almanac-app/models v0.0.0-20240925152943-6c978f5338a6 h1:32Jsbfc7Fu8KvM3U3VajZ0EegxoyJuGMOXvQA1UsRPo=
 gitlab.com/almanac-app/models v0.0.0-20240925152943-6c978f5338a6/go.mod h1:m/XStx0gaGrFSCLyVoxUCp+0F3ffZAgNtqyzn6h3Ov0=
 go.mongodb.org/mongo-driver v1.17.0 h1:Hp4q2MCjvY19ViwimTs00wHi7G4yzxh4/2+nTx8r40k=

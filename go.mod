@@ -7,6 +7,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.6.1
 	github.com/spf13/viper v1.19.0
+	gitlab.com/almanac-app/models v0.0.0-20240925152943-6c978f5338a6
 	go.mongodb.org/mongo-driver v1.17.0
 )
 
@@ -20,7 +21,6 @@ require (
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
-	gitlab.com/almanac-app/models v0.0.0-20240925152943-6c978f5338a6 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 )
 
