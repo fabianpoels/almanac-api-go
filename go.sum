@@ -131,6 +131,8 @@ github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78/go.mod h1:aL8wCCfTfS
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 gitlab.com/almanac-app/models v0.0.0-20240925152943-6c978f5338a6 h1:32Jsbfc7Fu8KvM3U3VajZ0EegxoyJuGMOXvQA1UsRPo=
 gitlab.com/almanac-app/models v0.0.0-20240925152943-6c978f5338a6/go.mod h1:m/XStx0gaGrFSCLyVoxUCp+0F3ffZAgNtqyzn6h3Ov0=
+gitlab.com/almanac-app/models v0.0.0-20241003205823-f21f1098de2b h1:VB8C2WvyyTcqzWUoR5AdrGkI734jfhFdvL07xEOBFLw=
+gitlab.com/almanac-app/models v0.0.0-20241003205823-f21f1098de2b/go.mod h1:m/XStx0gaGrFSCLyVoxUCp+0F3ffZAgNtqyzn6h3Ov0=
 go.mongodb.org/mongo-driver v1.17.0 h1:Hp4q2MCjvY19ViwimTs00wHi7G4yzxh4/2+nTx8r40k=
 go.mongodb.org/mongo-driver v1.17.0/go.mod h1:wwWm/+BuOddhcq3n68LKRmgk2wXzmF6s0SFOa0GINL4=
 go.uber.org/atomic v1.9.0 h1:ECmE8Bn/WFTYwEW/bpKD3M8VtR/zQVbavAoalC1PYyE=
