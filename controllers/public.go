@@ -3,7 +3,6 @@ package controllers
 import (
 	"almanac-api/collections"
 	"almanac-api/db"
-	"almanac-api/utils"
 	"net/http"
 	"time"
 
@@ -42,12 +41,12 @@ func (p PublicController) NewsItems(c *gin.Context) {
 	case "48hr":
 		twoDaysAgo := primitive.NewDateTimeFromTime(time.Now().Add(-48 * time.Hour))
 		filter["timestamp"] = bson.M{"$gte": twoDaysAgo}
-	case "week":
-		startOfWeek := primitive.NewDateTimeFromTime(utils.GetStartOfWeek())
-		filter["timestamp"] = bson.M{"$gte": startOfWeek}
-	case "month":
-		startOfMonth := primitive.NewDateTimeFromTime(utils.GetStartOfMonth())
-		filter["timestamp"] = bson.M{"$gte": startOfMonth}
+	case "7days":
+		sevenDaysAgo := primitive.NewDateTimeFromTime(time.Now().AddDate(0, 0, -7))
+		filter["timestamp"] = bson.M{"$gte": sevenDaysAgo}
+	case "30days":
+		thirtyDaysAgo := primitive.NewDateTimeFromTime(time.Now().AddDate(0, 0, -30))
+		filter["timestamp"] = bson.M{"$gte": thirtyDaysAgo}
 	case "custom":
 		fromDate, err := time.Parse("2006/01/02", req.From)
 		if err != nil {
