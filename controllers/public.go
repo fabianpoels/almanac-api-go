@@ -67,7 +67,9 @@ func (p PublicController) NewsItems(c *gin.Context) {
 	}
 
 	mongoClient := db.GetDbClient()
-	opts := options.Find().SetSort(bson.D{{"timestamp", -1}})
+	// limit to 2 pins
+	projection := bson.D{{"geoData", bson.D{{"features", bson.D{{"$slice", 2}}}}}}
+	opts := options.Find().SetSort(bson.D{{"timestamp", -1}}).SetProjection(projection)
 	cur, err := collections.GetNewsItemCollection(*mongoClient).Find(c, filter, opts)
 
 	if err != nil {
