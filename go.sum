@@ -137,6 +137,12 @@ gitlab.com/almanac-app/models v0.0.0-20241114222616-4571947d1eaf h1:Zuwi+yNFYh5r
 gitlab.com/almanac-app/models v0.0.0-20241114222616-4571947d1eaf/go.mod h1:m/XStx0gaGrFSCLyVoxUCp+0F3ffZAgNtqyzn6h3Ov0=
 gitlab.com/almanac-app/models v0.0.0-20241114222946-79bb73f192d8 h1:XMeNNQACPp1l+9vJay04K+k2vE8vFKxq2Ds5I+4FdzA=
 gitlab.com/almanac-app/models v0.0.0-20241114222946-79bb73f192d8/go.mod h1:m/XStx0gaGrFSCLyVoxUCp+0F3ffZAgNtqyzn6h3Ov0=
+gitlab.com/almanac-app/models v0.0.0-20241115101231-e602d9d5a138 h1:kxD7Iz7edxgAJ2nz3HPqfgBO6tAAuyCdrVj2pliic8M=
+gitlab.com/almanac-app/models v0.0.0-20241115101231-e602d9d5a138/go.mod h1:m/XStx0gaGrFSCLyVoxUCp+0F3ffZAgNtqyzn6h3Ov0=
+gitlab.com/almanac-app/models v0.0.0-20241115104043-1d7d226d39e5 h1:yGerBEP3I3uKwDGtg+KKPyjj6Rj8Uj35r7DMvt0qDEY=
+gitlab.com/almanac-app/models v0.0.0-20241115104043-1d7d226d39e5/go.mod h1:m/XStx0gaGrFSCLyVoxUCp+0F3ffZAgNtqyzn6h3Ov0=
+gitlab.com/almanac-app/models v0.0.0-20241115105145-5ca83b0ad37a h1:IeIjFku8iyUzOCwSUblKeSPGZeveGIC2Lf//ZOuJwnI=
+gitlab.com/almanac-app/models v0.0.0-20241115105145-5ca83b0ad37a/go.mod h1:m/XStx0gaGrFSCLyVoxUCp+0F3ffZAgNtqyzn6h3Ov0=
 go.mongodb.org/mongo-driver v1.17.0 h1:Hp4q2MCjvY19ViwimTs00wHi7G4yzxh4/2+nTx8r40k=
 go.mongodb.org/mongo-driver v1.17.0/go.mod h1:wwWm/+BuOddhcq3n68LKRmgk2wXzmF6s0SFOa0GINL4=
 go.uber.org/atomic v1.9.0 h1:ECmE8Bn/WFTYwEW/bpKD3M8VtR/zQVbavAoalC1PYyE=

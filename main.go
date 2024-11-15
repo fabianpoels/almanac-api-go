@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/csv"
 	"flag"
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"almanac-api/collections"
@@ -32,9 +35,66 @@ func main() {
 
 	// dataseeding
 	// dataseed()
+	// importLocations()
 
 	// start server
 	server.Init()
+}
+
+func importLocations() {
+	file, err := os.Open("locations_coordinates.csv")
+	if err != nil {
+		fmt.Printf("Error opening file: %v\n", err)
+		return
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	reader.Comma = ','          // Set delimiter (default is comma)
+	reader.FieldsPerRecord = -1 // -1 means no validation on number of fields
+
+	records, err := reader.ReadAll()
+	if err != nil {
+		fmt.Printf("Error reading CSV: %v\n", err)
+		return
+	}
+
+	for i, record := range records {
+		if i == 0 {
+			fmt.Println("Headers:", record)
+			continue
+		}
+
+		coords := strings.Split(record[2], ", ")
+		lat, _ := strconv.ParseFloat(coords[1], 64)
+		long, _ := strconv.ParseFloat(coords[0], 64)
+
+		geoData := models.GeoJSON{
+			Type: "FeatureCollection",
+			Features: []models.GeoJSONFeature{
+				models.GeoJSONFeature{
+					Type: "Feature",
+					Geometry: models.GeoJSONGeometry{
+						Type:        "Point",
+						Coordinates: []float64{lat, long},
+					},
+				},
+			},
+		}
+
+		poi := models.Poi{
+			Name:      record[0],
+			Icon:      record[1],
+			GeoData:   geoData,
+			Active:    true,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+		_, err := collections.GetPoicollection(*db.GetDbClient()).InsertOne(context.Background(), poi)
+		if err != nil {
+			panic(err)
+		}
+	}
 }
 
 func dataseed() {

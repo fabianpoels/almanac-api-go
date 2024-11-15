@@ -106,3 +106,23 @@ func (p PublicController) Categories(c *gin.Context) {
 
 	c.JSON(http.StatusOK, categories)
 }
+
+func (p PublicController) Pois(c *gin.Context) {
+	mongoClient := db.GetDbClient()
+	filter := bson.D{{"active", true}}
+	cur, err := collections.GetPoicollection(*mongoClient).Find(c, filter)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	pois := make([]models.Poi, 0)
+	err = cur.All(c, &pois)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, pois)
+}

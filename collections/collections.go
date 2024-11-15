@@ -18,6 +18,10 @@ func GetUserCollection(client mongo.Client) *mongo.Collection {
 	return getCollection("users", client)
 }
 
+func GetPoicollection(client mongo.Client) *mongo.Collection {
+	return getCollection("pois", client)
+}
+
 func getCollection(name string, client mongo.Client) *mongo.Collection {
 	return client.Database(config.GetConfig().GetString("database")).Collection(name)
 }
