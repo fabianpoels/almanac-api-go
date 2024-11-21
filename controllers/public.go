@@ -126,3 +126,22 @@ func (p PublicController) Pois(c *gin.Context) {
 
 	c.JSON(http.StatusOK, pois)
 }
+
+func (p PublicController) Municipalities(c *gin.Context) {
+	mongoClient := db.GetDbClient()
+	cur, err := collections.GetMunicipalityCollection(*mongoClient).Find(c, bson.D{{}})
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	municipalities := make([]models.Municipality, 0)
+	err = cur.All(c, &municipalities)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, municipalities)
+}

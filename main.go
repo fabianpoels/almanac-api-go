@@ -76,7 +76,7 @@ func importLocations() {
 					Type: "Feature",
 					Geometry: models.GeoJSONGeometry{
 						Type:        "Point",
-						Coordinates: []float64{lat, long},
+						Coordinates: []interface{}{lat, long},
 					},
 				},
 			},
