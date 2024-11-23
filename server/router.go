@@ -27,7 +27,7 @@ func NewRouter() *gin.Engine {
 		router.SetTrustedProxies(nil)
 		corsConfig.AllowOrigins = []string{"http://localhost:9000", "http://127.0.0.1:9000"}
 		corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Accept", "User-Agent", "Cache-Control"}
-		corsConfig.AllowMethods = []string{"POST", "GET", "PUT", "OPTIONS"}
+		corsConfig.AllowMethods = []string{"POST", "GET", "PUT", "DELETE", "OPTIONS"}
 		corsConfig.ExposeHeaders = []string{"Content-Length"}
 		corsConfig.AllowCredentials = true
 		corsConfig.MaxAge = 12 * time.Hour
@@ -36,7 +36,7 @@ func NewRouter() *gin.Engine {
 		router.SetTrustedProxies(nil)
 		corsConfig.AllowOrigins = []string{fmt.Sprintf("http://%s", domain)}
 		corsConfig.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Accept", "User-Agent", "Cache-Control"}
-		corsConfig.AllowMethods = []string{"POST", "GET", "PUT", "OPTIONS"}
+		corsConfig.AllowMethods = []string{"POST", "GET", "PUT", "DELETE", "OPTIONS"}
 		corsConfig.ExposeHeaders = []string{"Content-Length"}
 		corsConfig.AllowCredentials = true
 		corsConfig.MaxAge = 12 * time.Hour
@@ -50,6 +50,7 @@ func NewRouter() *gin.Engine {
 	// ADMIN CONTROLLERS
 	newsItems := new(admin.NewsItemsController)
 	municipalities := new(admin.MunicipalitiesController)
+	riskLevels := new(admin.RiskLevelsController)
 
 	api := router.Group("api")
 	{
@@ -59,6 +60,7 @@ func NewRouter() *gin.Engine {
 			v1.POST("/news", public.NewsItems)
 			v1.GET("/categories", public.Categories)
 			v1.GET("/pois", public.Pois)
+			v1.GET("/riskLevels", public.RiskLevels)
 
 			// auth
 			v1.POST("/auth/login", auth.Login)
@@ -80,6 +82,12 @@ func NewRouter() *gin.Engine {
 							news.PUT("/:id", newsItems.Update)
 						}
 						admin.GET("/municipalities", municipalities.List)
+						rl := admin.Group("riskLevels")
+						{
+							rl.GET("", riskLevels.List)
+							rl.POST("", riskLevels.Create)
+							rl.DELETE("/:id", riskLevels.Delete)
+						}
 					}
 				}
 			}

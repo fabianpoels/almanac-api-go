@@ -26,6 +26,10 @@ func GetMunicipalityCollection(client mongo.Client) *mongo.Collection {
 	return getCollection("municipalities", client)
 }
 
+func GetRiskLevelCollection(client mongo.Client) *mongo.Collection {
+	return getCollection("riskLevels", client)
+}
+
 func getCollection(name string, client mongo.Client) *mongo.Collection {
 	return client.Database(config.GetConfig().GetString("database")).Collection(name)
 }

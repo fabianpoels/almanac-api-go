@@ -127,21 +127,23 @@ func (p PublicController) Pois(c *gin.Context) {
 	c.JSON(http.StatusOK, pois)
 }
 
-func (p PublicController) Municipalities(c *gin.Context) {
+func (p PublicController) RiskLevels(c *gin.Context) {
 	mongoClient := db.GetDbClient()
-	cur, err := collections.GetMunicipalityCollection(*mongoClient).Find(c, bson.D{{}})
+	filter := bson.M{"archivedAt": nil}
+	opts := options.Find().SetSort(bson.D{{"createdAt", -1}})
+	cur, err := collections.GetRiskLevelCollection(*mongoClient).Find(c, filter, opts)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	municipalities := make([]models.Municipality, 0)
-	err = cur.All(c, &municipalities)
+	riskLevels := make([]models.RiskLevel, 0)
+	err = cur.All(c, &riskLevels)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, municipalities)
+	c.JSON(http.StatusOK, riskLevels)
 }

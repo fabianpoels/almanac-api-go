@@ -78,5 +78,9 @@ func DbConnect() {
 	}
 	log.Println("Created User index: " + cat)
 
+	// MUNICIPALITY INDEXES
+
+	// RISK LEVEL INDEXES
+
 	mongoClient = client
 }
