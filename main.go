@@ -36,6 +36,9 @@ func main() {
 	// dataseeding
 	// dataseed()
 	// importLocations()
+	//
+	// add user
+	// addUser()
 
 	// start server
 	server.Init()
@@ -158,4 +161,25 @@ func dataseed() {
 	// 	panic(err)
 	// }
 	// log.Println(ress)
+}
+
+func addUser() {
+	passw, err := utils.HashPassword("")
+	if err != nil {
+		log.Fatal(err)
+	}
+	newUser := models.User{
+		Email:     "mhannaralph@hotmail.com",
+		Password:  passw,
+		Name:      "Ralph",
+		Active:    true,
+		Role:      "superadmin",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+	res, err := collections.GetUserCollection(*db.GetDbClient()).InsertOne(context.Background(), newUser)
+	if err != nil {
+		panic(err)
+	}
+	log.Println(res)
 }

@@ -86,6 +86,7 @@ func NewRouter() *gin.Engine {
 						{
 							rl.GET("", riskLevels.List)
 							rl.POST("", riskLevels.Create)
+							rl.PUT("/:id", riskLevels.Update)
 							rl.DELETE("/:id", riskLevels.Delete)
 						}
 					}
