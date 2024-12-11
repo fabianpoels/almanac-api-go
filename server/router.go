@@ -61,6 +61,7 @@ func NewRouter() *gin.Engine {
 			v1.GET("/categories", public.Categories)
 			v1.GET("/pois", public.Pois)
 			v1.GET("/riskLevels", public.RiskLevels)
+			v1.GET("/latestReport", public.LatestReport)
 
 			// auth
 			v1.POST("/auth/login", auth.Login)

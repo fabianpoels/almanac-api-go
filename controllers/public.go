@@ -147,3 +147,39 @@ func (p PublicController) RiskLevels(c *gin.Context) {
 
 	c.JSON(http.StatusOK, riskLevels)
 }
+
+func (p PublicController) Reports(c *gin.Context) {
+	mongoClient := db.GetDbClient()
+	filter := bson.M{"archivedAt": nil}
+	opts := options.Find().SetSort(bson.D{{"createdAt", -1}})
+	cur, err := collections.GetDailyReportsCollection(*mongoClient).Find(c, filter, opts)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	dailyReports := make([]models.DailyReport, 0)
+	err = cur.All(c, &dailyReports)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dailyReports)
+}
+
+func (p PublicController) LatestReport(c *gin.Context) {
+	mongoClient := db.GetDbClient()
+	filter := bson.M{"archivedAt": nil}
+	opts := options.FindOne().SetSort(bson.D{{"date", -1}})
+
+	var latestReport models.DailyReport
+	err := collections.GetDailyReportsCollection(*mongoClient).FindOne(c, filter, opts).Decode(&latestReport)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, latestReport)
+}

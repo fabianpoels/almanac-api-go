@@ -30,6 +30,10 @@ func GetRiskLevelCollection(client mongo.Client) *mongo.Collection {
 	return getCollection("riskLevels", client)
 }
 
+func GetDailyReportsCollection(client mongo.Client) *mongo.Collection {
+	return getCollection("dailyReports", client)
+}
+
 func getCollection(name string, client mongo.Client) *mongo.Collection {
 	return client.Database(config.GetConfig().GetString("database")).Collection(name)
 }
