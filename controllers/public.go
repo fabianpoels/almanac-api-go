@@ -4,6 +4,7 @@ import (
 	"almanac-api/collections"
 	"almanac-api/db"
 	"almanac-api/serializers"
+	"errors"
 	"net/http"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"gitlab.com/almanac-app/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -149,41 +151,28 @@ func (p PublicController) RiskLevels(c *gin.Context) {
 	c.JSON(http.StatusOK, riskLevels)
 }
 
-func (p PublicController) Reports(c *gin.Context) {
+func (p PublicController) Report(c *gin.Context) {
 	mongoClient := db.GetDbClient()
-	filter := bson.M{"archivedAt": nil}
-	opts := options.Find().SetSort(bson.D{{"createdAt", -1}})
-	cur, err := collections.GetDailyReportsCollection(*mongoClient).Find(c, filter, opts)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+	dateString := c.Query("date")
+	filter := bson.M{
+		"archivedAt": nil,
+		"date":       dateString,
 	}
-
-	dailyReports := make([]models.DailyReport, 0)
-	err = cur.All(c, &dailyReports)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, dailyReports)
-}
-
-func (p PublicController) LatestReport(c *gin.Context) {
-	mongoClient := db.GetDbClient()
-	filter := bson.M{"archivedAt": nil}
 	opts := options.FindOne().SetSort(bson.D{{"date", -1}})
 
-	var latestReport models.DailyReport
-	err := collections.GetDailyReportsCollection(*mongoClient).FindOne(c, filter, opts).Decode(&latestReport)
+	var report models.DailyReport
+	err := collections.GetDailyReportsCollection(*mongoClient).FindOne(c, filter, opts).Decode(&report)
 	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "No report for this date"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	serializer := serializers.ReportSerializer{
-		DailyReport: latestReport,
+		DailyReport: report,
 	}
 	c.JSON(http.StatusOK, serializer.PublicResponse())
 }
