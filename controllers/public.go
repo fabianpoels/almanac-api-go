@@ -3,6 +3,7 @@ package controllers
 import (
 	"almanac-api/collections"
 	"almanac-api/db"
+	"almanac-api/serializers"
 	"net/http"
 	"time"
 
@@ -181,5 +182,8 @@ func (p PublicController) LatestReport(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, latestReport)
+	serializer := serializers.ReportSerializer{
+		DailyReport: latestReport,
+	}
+	c.JSON(http.StatusOK, serializer.PublicResponse())
 }

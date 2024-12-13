@@ -30,6 +30,8 @@ func (m MunicipalitiesController) List(c *gin.Context) {
 		return
 	}
 
-	serializer := serializers.MunicipalitiesSerializer{c, municipalities}
+	serializer := serializers.MunicipalitiesSerializer{
+		Municipalities: municipalities,
+	}
 	c.JSON(http.StatusOK, serializer.Response())
 }
