@@ -4,6 +4,7 @@ import (
 	"almanac-api/collections"
 	"almanac-api/db"
 	"almanac-api/serializers"
+	"almanac-api/services"
 	"errors"
 	"net/http"
 	"time"
@@ -131,18 +132,9 @@ func (p PublicController) Pois(c *gin.Context) {
 }
 
 func (p PublicController) RiskLevels(c *gin.Context) {
-	mongoClient := db.GetDbClient()
-	filter := bson.M{"archivedAt": nil}
-	opts := options.Find().SetSort(bson.D{{"createdAt", -1}})
-	cur, err := collections.GetRiskLevelCollection(*mongoClient).Find(c, filter, opts)
+	riskLevelService := services.RiskLevelService{C: c}
 
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	riskLevels := make([]models.RiskLevel, 0)
-	err = cur.All(c, &riskLevels)
+	riskLevels, err := riskLevelService.PublicRiskLevels()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

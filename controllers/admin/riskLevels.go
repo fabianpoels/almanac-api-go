@@ -4,6 +4,7 @@ import (
 	"almanac-api/collections"
 	"almanac-api/db"
 	"almanac-api/middleware"
+	"almanac-api/services"
 	"fmt"
 	"net/http"
 	"time"
@@ -14,11 +15,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-type CreateRiskLevel struct {
-	Level          int      `json:"level"`
-	Municipalities []string `json:"municipalities"`
-}
 
 type RiskLevelsController struct {
 }
@@ -45,73 +41,28 @@ func (r RiskLevelsController) List(c *gin.Context) {
 }
 
 func (r RiskLevelsController) Create(c *gin.Context) {
-	mongoClient := db.GetDbClient()
-
 	user, ok := middleware.GetUserFromContext(c)
 	if !ok || !user.IsAdmin() {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Unauthorized": "Not admin"})
 		return
 	}
 
-	var createRiskLevel CreateRiskLevel
+	riskLevelService := services.RiskLevelService{C: c}
+
+	var createRiskLevel services.CreateRiskLevel
 	err := c.BindJSON(&createRiskLevel)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "invalid request body"})
 		return
 	}
 
-	municipalityObjectIDs := make([]primitive.ObjectID, len(createRiskLevel.Municipalities))
-	for i, idStr := range createRiskLevel.Municipalities {
-		objectID, err := primitive.ObjectIDFromHex(idStr)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid municipality ID format: %s", idStr)})
-			return
-		}
-		municipalityObjectIDs[i] = objectID
-	}
-
-	var municipalities []models.Municipality
-	cursor, err := collections.GetMunicipalityCollection(*mongoClient).Find(c, bson.M{
-		"_id": bson.M{"$in": municipalityObjectIDs},
-	})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch municipalities"})
-		return
-	}
-	defer cursor.Close(c)
-
-	if err = cursor.All(c, &municipalities); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode municipalities"})
-		return
-	}
-
-	if len(municipalities) != len(createRiskLevel.Municipalities) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Some municipality IDs are invalid"})
-		return
-	}
-
-	riskLevel := models.RiskLevel{
-		User:           user.Id,
-		Municipalities: municipalities,
-		Level:          createRiskLevel.Level,
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
-	}
-
-	result, err := collections.GetRiskLevelCollection(*mongoClient).InsertOne(c, riskLevel)
+	riskLevel, err := riskLevelService.Create(&createRiskLevel, &user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	var createdRiskLevel models.RiskLevel
-	err = collections.GetRiskLevelCollection(*mongoClient).FindOne(c, bson.D{{"_id", result.InsertedID}}).Decode(&createdRiskLevel)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.JSON(http.StatusCreated, createdRiskLevel)
+	c.JSON(http.StatusCreated, riskLevel)
 }
 
 func (r RiskLevelsController) Update(c *gin.Context) {
@@ -131,7 +82,7 @@ func (r RiskLevelsController) Update(c *gin.Context) {
 		return
 	}
 
-	var updateRiskLevel CreateRiskLevel
+	var updateRiskLevel services.CreateRiskLevel
 	err = c.BindJSON(&updateRiskLevel)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "invalid request body"})
@@ -180,6 +131,9 @@ func (r RiskLevelsController) Update(c *gin.Context) {
 		},
 		options.FindOneAndUpdate().SetReturnDocument(options.After)).Decode(&updatedRiskLevel)
 
+	riskLevelService := services.RiskLevelService{C: c}
+	riskLevelService.InvalidatePublicCache()
+
 	c.JSON(http.StatusOK, updatedRiskLevel)
 }
 
@@ -207,6 +161,9 @@ func (r RiskLevelsController) Delete(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "error updating risk level"})
 		return
 	}
+
+	riskLevelService := services.RiskLevelService{C: c}
+	riskLevelService.InvalidatePublicCache()
 
 	c.JSON(http.StatusOK, bson.M{})
 }
