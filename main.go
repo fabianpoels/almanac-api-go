@@ -40,6 +40,8 @@ func main() {
 	// add user
 	// addUser()
 
+	// addDemoUsers()
+
 	// start server
 	server.Init()
 }
@@ -182,4 +184,55 @@ func addUser() {
 		panic(err)
 	}
 	log.Println(res)
+}
+
+type demoUser struct {
+	Name     string
+	Password string
+}
+
+func addDemoUsers() {
+	demoUsers := []demoUser{
+		{
+			Name:     "demouser1",
+			Password: "demouser1password",
+		},
+		{
+			Name:     "demouser2",
+			Password: "demouser2password",
+		},
+		{
+			Name:     "demouser3",
+			Password: "demouser3password",
+		},
+		{
+			Name:     "demouser4",
+			Password: "demouser4password",
+		},
+		{
+			Name:     "demouser5",
+			Password: "demouser5password",
+		},
+	}
+
+	for _, user := range demoUsers {
+		passw, err := utils.HashPassword(user.Password)
+		if err != nil {
+			log.Fatal(err)
+		}
+		newUser := models.User{
+			Email:     fmt.Sprintf("%s@nonexistentmail.com", user.Name),
+			Password:  passw,
+			Name:      user.Name,
+			Active:    true,
+			Role:      "superadmin",
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+		res, err := collections.GetUserCollection(*db.GetDbClient()).InsertOne(context.Background(), newUser)
+		if err != nil {
+			panic(err)
+		}
+		log.Println(res)
+	}
 }
