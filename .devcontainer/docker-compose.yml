@@ -13,8 +13,6 @@ services:
       - mongodb
       - redis
     environment:
-      - MONGO_URI=mongodb://mongodb:27017
-      - REDIS_URI=redis://redis:6379
       - SSH_AUTH_SOCK=/ssh-agent
     networks:
       - app-network
