@@ -1,0 +1,33 @@
+{
+    "name": "Go API Development",
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "app",
+    "workspaceFolder": "/app",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "go.toolsManagement.checkForUpdates": "local",
+                "go.useLanguageServer": true,
+                "go.gopath": "/go",
+                "editor.formatOnSave": true,
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "terminal.integrated.profiles.linux": {
+                    "bash": {
+                        "path": "/bin/bash"
+                    }
+                }
+            },
+            "extensions": [
+                "golang.go",
+                "ms-azuretools.vscode-docker"
+            ]
+        }
+    },
+    "forwardPorts": [
+        8080, // Your API port
+        27017, // MongoDB
+        6379 // Redis
+    ],
+    "postCreateCommand": "go mod download",
+    "remoteUser": "vscode"
+}
