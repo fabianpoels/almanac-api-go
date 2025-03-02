@@ -37,6 +37,8 @@ func DbConnect() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	log.Printf("Connecting to db with uri: %s", mongoUrl)
+
 	// Init connection
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {

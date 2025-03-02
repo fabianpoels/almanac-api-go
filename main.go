@@ -18,12 +18,17 @@ import (
 	"almanac-api/utils"
 
 	"gitlab.com/almanac-app/models"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
 	env := config.GetEnv("ENVIRONMENT")
 
 	environment := flag.String("e", env, "")
+	migration := flag.Bool("migrate", false, "Run db migration task")
+
 	flag.Usage = func() {
 		fmt.Println("Usage: server -e {mode}")
 		os.Exit(1)
@@ -33,14 +38,11 @@ func main() {
 	db.DbConnect()
 	db.CacheConnect()
 
-	// dataseeding
-	// dataseed()
-	// importLocations()
-	//
-	// add user
-	// addUser()
-
-	// addDemoUsers()
+	if *migration {
+		log.Println("MIGRATING")
+		riskLevelsMigration()
+		return
+	}
 
 	// start server
 	server.Init()
@@ -234,5 +236,53 @@ func addDemoUsers() {
 			panic(err)
 		}
 		log.Println(res)
+	}
+}
+
+func riskLevelsMigration() {
+	mongoClient := db.GetDbClient()
+	c := context.Background()
+
+	// add risklevel to all municipalities
+	update := bson.M{
+		"$set": bson.M{
+			"riskLevel": -1,
+			"updatedAt": time.Now(),
+		},
+	}
+	collections.GetMunicipalityCollection(*mongoClient).UpdateMany(c, bson.D{{}}, update, options.Update())
+
+	// update if already present
+	cur, err := collections.GetRiskLevelCollection(*mongoClient).Find(c, bson.D{{}}, options.Find())
+
+	if err != nil {
+		panic(err)
+	}
+
+	riskLevels := make([]models.RiskLevel, 0)
+
+	err = cur.All(c, &riskLevels)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, riskLevel := range riskLevels {
+		log.Println(riskLevel.Level)
+		municipalityObjectIDs := make([]primitive.ObjectID, len(riskLevel.Municipalities))
+
+		for i, m := range riskLevel.Municipalities {
+			municipalityObjectIDs[i] = m.Id
+		}
+		log.Println(municipalityObjectIDs)
+		filter := bson.M{
+			"_id": bson.M{"$in": municipalityObjectIDs},
+		}
+		update := bson.M{
+			"$set": bson.M{
+				"riskLevel": riskLevel.Level,
+				"updatedAt": time.Now(),
+			},
+		}
+		collections.GetMunicipalityCollection(*mongoClient).UpdateMany(c, filter, update, options.Update())
 	}
 }

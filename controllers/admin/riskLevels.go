@@ -3,16 +3,11 @@ package admin
 import (
 	"almanac-api/collections"
 	"almanac-api/db"
-	"almanac-api/middleware"
-	"almanac-api/services"
-	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"gitlab.com/almanac-app/models"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -38,132 +33,4 @@ func (r RiskLevelsController) List(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, riskLevels)
-}
-
-func (r RiskLevelsController) Create(c *gin.Context) {
-	user, ok := middleware.GetUserFromContext(c)
-	if !ok || !user.IsAdmin() {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Unauthorized": "Not admin"})
-		return
-	}
-
-	riskLevelService := services.RiskLevelService{C: c}
-
-	var createRiskLevel services.CreateRiskLevel
-	err := c.BindJSON(&createRiskLevel)
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "invalid request body"})
-		return
-	}
-
-	riskLevel, err := riskLevelService.Create(&createRiskLevel, &user)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.JSON(http.StatusCreated, riskLevel)
-}
-
-func (r RiskLevelsController) Update(c *gin.Context) {
-	mongoClient := db.GetDbClient()
-
-	user, ok := middleware.GetUserFromContext(c)
-	if !ok || !user.IsAdmin() {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"Unauthorized": "Not admin"})
-		return
-	}
-
-	id := c.Param("id")
-	objId, err := primitive.ObjectIDFromHex(id)
-
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "no valid id provided"})
-		return
-	}
-
-	var updateRiskLevel services.CreateRiskLevel
-	err = c.BindJSON(&updateRiskLevel)
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "invalid request body"})
-		return
-	}
-
-	municipalityObjectIDs := make([]primitive.ObjectID, len(updateRiskLevel.Municipalities))
-	for i, idStr := range updateRiskLevel.Municipalities {
-		objectID, err := primitive.ObjectIDFromHex(idStr)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid municipality ID format: %s", idStr)})
-			return
-		}
-		municipalityObjectIDs[i] = objectID
-	}
-
-	var municipalities []models.Municipality
-	cursor, err := collections.GetMunicipalityCollection(*mongoClient).Find(c, bson.M{
-		"_id": bson.M{"$in": municipalityObjectIDs},
-	})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch municipalities"})
-		return
-	}
-	defer cursor.Close(c)
-
-	if err = cursor.All(c, &municipalities); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode municipalities"})
-		return
-	}
-
-	if len(municipalities) != len(updateRiskLevel.Municipalities) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Some municipality IDs are invalid"})
-		return
-	}
-
-	var updatedRiskLevel models.RiskLevel
-	err = collections.GetRiskLevelCollection(*mongoClient).FindOneAndUpdate(c,
-		bson.M{"_id": objId},
-		bson.M{
-			"$set": bson.M{
-				"level":          updateRiskLevel.Level,
-				"municipalities": municipalities,
-				"updatedAt":      time.Now(),
-			},
-		},
-		options.FindOneAndUpdate().SetReturnDocument(options.After)).Decode(&updatedRiskLevel)
-
-	riskLevelService := services.RiskLevelService{C: c}
-	riskLevelService.InvalidatePublicCache()
-
-	c.JSON(http.StatusOK, updatedRiskLevel)
-}
-
-func (r RiskLevelsController) Delete(c *gin.Context) {
-	mongoClient := db.GetDbClient()
-	id := c.Param("id")
-	objId, err := primitive.ObjectIDFromHex(id)
-
-	if err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "no valid id provided"})
-		return
-	}
-
-	update := bson.M{
-		"updatedAt":  time.Now(),
-		"archivedAt": time.Now(),
-	}
-	result, err := collections.GetRiskLevelCollection(*mongoClient).UpdateOne(c, bson.M{"_id": objId}, bson.M{"$set": update})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if result.MatchedCount != 1 {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "error updating risk level"})
-		return
-	}
-
-	riskLevelService := services.RiskLevelService{C: c}
-	riskLevelService.InvalidatePublicCache()
-
-	c.JSON(http.StatusOK, bson.M{})
 }

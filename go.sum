@@ -161,6 +161,8 @@ gitlab.com/almanac-app/models v0.0.0-20241203163005-fa97ddfa5f36 h1:xkMreC2Uh3tm
 gitlab.com/almanac-app/models v0.0.0-20241203163005-fa97ddfa5f36/go.mod h1:m/XStx0gaGrFSCLyVoxUCp+0F3ffZAgNtqyzn6h3Ov0=
 gitlab.com/almanac-app/models v0.0.0-20241209134610-9627ee1ba65c h1:g4bLhu913YqgCdEI9PnXLw1NIft1F90DyRdvZTrqiLM=
 gitlab.com/almanac-app/models v0.0.0-20241209134610-9627ee1ba65c/go.mod h1:m/XStx0gaGrFSCLyVoxUCp+0F3ffZAgNtqyzn6h3Ov0=
+gitlab.com/almanac-app/models v0.0.0-20250223201750-56b6ad0eb35b h1:6Zp8JQypx9DKtX+Dza5OEVavBehk1ABN66C0+TreG7g=
+gitlab.com/almanac-app/models v0.0.0-20250223201750-56b6ad0eb35b/go.mod h1:m/XStx0gaGrFSCLyVoxUCp+0F3ffZAgNtqyzn6h3Ov0=
 go.mongodb.org/mongo-driver v1.17.0 h1:Hp4q2MCjvY19ViwimTs00wHi7G4yzxh4/2+nTx8r40k=
 go.mongodb.org/mongo-driver v1.17.0/go.mod h1:wwWm/+BuOddhcq3n68LKRmgk2wXzmF6s0SFOa0GINL4=
 go.uber.org/atomic v1.9.0 h1:ECmE8Bn/WFTYwEW/bpKD3M8VtR/zQVbavAoalC1PYyE=

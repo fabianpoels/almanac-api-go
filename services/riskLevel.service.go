@@ -5,12 +5,10 @@ import (
 	"almanac-api/db"
 	"encoding/json"
 	"log"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"gitlab.com/almanac-app/models"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -25,88 +23,72 @@ type RiskLevelService struct {
 	C *gin.Context
 }
 
-func (service *RiskLevelService) Create(createRiskLevel *CreateRiskLevel, user *models.User) (riskLevel *models.RiskLevel, err error) {
-	mongoClient := db.GetDbClient()
+// SeverityLevel represents the different severity categories
+type SeverityLevel string
 
-	municipalityObjectIDs := make([]primitive.ObjectID, len(createRiskLevel.Municipalities))
-	for i, idStr := range createRiskLevel.Municipalities {
-		objectID, err := primitive.ObjectIDFromHex(idStr)
-		if err != nil {
-			log.Printf("Invalid municipality ID format: %s", idStr)
-			return riskLevel, err
-		}
-		municipalityObjectIDs[i] = objectID
-	}
+// Define the possible severity levels
+const (
+	Minor    SeverityLevel = "minor"
+	Moderate SeverityLevel = "moderate"
+	Severe   SeverityLevel = "severe"
+)
 
-	var municipalities []models.Municipality
-	cursor, err := collections.GetMunicipalityCollection(*mongoClient).Find(service.C, bson.M{
-		"_id": bson.M{"$in": municipalityObjectIDs},
-	})
-	if err != nil {
-		log.Println("error: Failed to fetch municipalities")
-		return riskLevel, err
-	}
-	defer cursor.Close(service.C)
-
-	if err = cursor.All(service.C, &municipalities); err != nil {
-		log.Println("error: Failed to decode municipalities")
-		return riskLevel, err
-	}
-
-	if len(municipalities) != len(createRiskLevel.Municipalities) {
-		log.Println("error: Some municipality IDs are invalid")
-		return riskLevel, err
-	}
-
-	riskLevel = &models.RiskLevel{
-		User:           user.Id,
-		Municipalities: municipalities,
-		Level:          createRiskLevel.Level,
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
-	}
-
-	result, err := collections.GetRiskLevelCollection(*mongoClient).InsertOne(service.C, riskLevel)
-	if err != nil {
-		return riskLevel, err
-	}
-
-	var createdRiskLevel models.RiskLevel
-	err = collections.GetRiskLevelCollection(*mongoClient).FindOne(service.C, bson.D{{"_id", result.InsertedID}}).Decode(&createdRiskLevel)
-	if err != nil {
-		return riskLevel, err
-	}
-
-	service.InvalidatePublicCache()
-
-	return &createdRiskLevel, nil
+type RiskLevelResponse struct {
+	Minor    models.GeoJSON `json:"minor"`
+	Moderate models.GeoJSON `json:"moderate"`
+	Severe   models.GeoJSON `json:"severe"`
 }
 
-func (service *RiskLevelService) PublicRiskLevels() (riskLevels []*models.RiskLevel, err error) {
+func (service *RiskLevelService) PublicRiskLevels() (response RiskLevelResponse, err error) {
 	// try to load risklevels from cache
-	riskLevels, err = publicRiskLevelsFromCache(service.C)
+	response, err = publicRiskLevelsFromCache(service.C)
 	if err == nil {
-		return riskLevels, nil
+		return response, nil
 	}
 
-	// else, load them from the DB and put them in the cache
 	mongoClient := db.GetDbClient()
-	filter := bson.M{"archivedAt": nil}
-	opts := options.Find().SetSort(bson.D{{"createdAt", -1}})
-	cur, err := collections.GetRiskLevelCollection(*mongoClient).Find(service.C, filter, opts)
 
+	// find municipalities with risk level >= 0
+	filter := bson.M{"riskLevel": bson.M{"$gte": 0}}
+	cur, err := collections.GetMunicipalityCollection(*mongoClient).Find(service.C, filter, options.Find())
 	if err != nil {
-		return riskLevels, err
+		return response, err
 	}
 
-	err = cur.All(service.C, &riskLevels)
+	municipalities := make([]models.Municipality, 0)
+	err = cur.All(service.C, &municipalities)
 	if err != nil {
-		return riskLevels, err
+		return response, err
 	}
 
-	storePublicRiskLevelsInCache(service.C, riskLevels)
+	response = RiskLevelResponse{
+		Minor: models.GeoJSON{
+			Type:     "FeatureCollection",
+			Features: []models.GeoJSONFeature{},
+		},
+		Moderate: models.GeoJSON{
+			Type:     "FeatureCollection",
+			Features: []models.GeoJSONFeature{},
+		},
+		Severe: models.GeoJSON{
+			Type:     "FeatureCollection",
+			Features: []models.GeoJSONFeature{},
+		},
+	}
+	for _, m := range municipalities {
+		switch m.RiskLevel {
+		case 0:
+			response.Minor.Features = append(response.Minor.Features, m.GeoData.Features...)
+		case 1:
+			response.Moderate.Features = append(response.Moderate.Features, m.GeoData.Features...)
+		case 2:
+			response.Severe.Features = append(response.Severe.Features, m.GeoData.Features...)
+		}
+	}
 
-	return riskLevels, nil
+	storePublicRiskLevelsInCache(service.C, response)
+
+	return response, nil
 }
 
 func (service *RiskLevelService) InvalidatePublicCache() {
@@ -114,27 +96,27 @@ func (service *RiskLevelService) InvalidatePublicCache() {
 	cacheClient.Del(service.C, cacheKey)
 }
 
-func publicRiskLevelsFromCache(c *gin.Context) (riskLevels []*models.RiskLevel, err error) {
+func publicRiskLevelsFromCache(c *gin.Context) (response RiskLevelResponse, err error) {
 	cacheClient := db.GetCacheClient()
-	riskLevelsString, err := cacheClient.Get(c, cacheKey).Result()
+	responseString, err := cacheClient.Get(c, cacheKey).Result()
 	if err != nil {
-		return riskLevels, err
+		return response, err
 	}
 
-	err = json.Unmarshal([]byte(riskLevelsString), &riskLevels)
+	err = json.Unmarshal([]byte(responseString), &response)
 	if err != nil {
-		return riskLevels, err
+		return response, err
 	}
 
-	return riskLevels, nil
+	return response, nil
 }
 
-func storePublicRiskLevelsInCache(c *gin.Context, riskLevels []*models.RiskLevel) {
+func storePublicRiskLevelsInCache(c *gin.Context, response RiskLevelResponse) {
 	cacheClient := db.GetCacheClient()
-	riskLevelsString, err := json.Marshal(riskLevels)
+	responseString, err := json.Marshal(response)
 	if err != nil {
 		log.Printf("Error storing public riskLevels in cache: %s", err.Error())
 		return
 	}
-	cacheClient.Set(c, cacheKey, riskLevelsString, 0)
+	cacheClient.Set(c, cacheKey, responseString, 0)
 }

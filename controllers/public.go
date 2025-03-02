@@ -134,13 +134,13 @@ func (p PublicController) Pois(c *gin.Context) {
 func (p PublicController) RiskLevels(c *gin.Context) {
 	riskLevelService := services.RiskLevelService{C: c}
 
-	riskLevels, err := riskLevelService.PublicRiskLevels()
+	response, err := riskLevelService.PublicRiskLevels()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, riskLevels)
+	c.JSON(http.StatusOK, response)
 }
 
 func (p PublicController) Report(c *gin.Context) {

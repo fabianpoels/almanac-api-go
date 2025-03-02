@@ -50,7 +50,6 @@ func NewRouter() *gin.Engine {
 	// ADMIN CONTROLLERS
 	newsItems := new(admin.NewsItemsController)
 	municipalities := new(admin.MunicipalitiesController)
-	riskLevels := new(admin.RiskLevelsController)
 
 	api := router.Group("api")
 	{
@@ -82,13 +81,12 @@ func NewRouter() *gin.Engine {
 							news.POST("", newsItems.Create)
 							news.PUT("/:id", newsItems.Update)
 						}
-						admin.GET("/municipalities", municipalities.List)
-						rl := admin.Group("riskLevels")
+						m := admin.Group("municipalities")
 						{
-							rl.GET("", riskLevels.List)
-							rl.POST("", riskLevels.Create)
-							rl.PUT("/:id", riskLevels.Update)
-							rl.DELETE("/:id", riskLevels.Delete)
+							m.GET("", municipalities.List)
+							m.POST("", municipalities.Create)
+							m.PUT("/:id", municipalities.Update)
+							m.DELETE("/:id", municipalities.Delete)
 						}
 					}
 				}
