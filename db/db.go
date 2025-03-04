@@ -81,16 +81,16 @@ func DbConnect() {
 	log.Println("Created Category index: " + cat)
 
 	// MUNICIPALITY INDEXES
-	municipalityOsmIndex := mongo.IndexModel{
-		Keys:    bson.D{{Key: "osmId", Value: 1}},
-		Options: options.Index().SetUnique(true),
-	}
-	mun, err := collections.GetMunicipalityCollection(*client).Indexes().CreateOne(ctx, municipalityOsmIndex)
-	if err != nil {
-		log.Fatal("⛒ Error creating Municipality osmId index")
-		log.Fatal(err)
-	}
-	log.Println("Created Municipality index: " + mun)
+	// municipalityOsmIndex := mongo.IndexModel{
+	// 	Keys:    bson.D{{Key: "osmId", Value: 1}},
+	// 	Options: options.Index().SetUnique(true),
+	// }
+	// mun, err := collections.GetMunicipalityCollection(*client).Indexes().CreateOne(ctx, municipalityOsmIndex)
+	// if err != nil {
+	// 	log.Fatal("⛒ Error creating Municipality osmId index")
+	// 	log.Fatal(err)
+	// }
+	// log.Println("Created Municipality index: " + mun)
 
 	// RISK LEVEL INDEXES
 
