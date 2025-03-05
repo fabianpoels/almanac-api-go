@@ -17,7 +17,8 @@ type MunicipalityService struct {
 }
 
 type UpdateMunicipality struct {
-	RiskLevel int `json:"riskLevel"`
+	RiskLevel int            `json:"riskLevel"`
+	GeoData   models.GeoJSON `json:"geoData"`
 }
 
 func (service *MunicipalityService) Create(createMunicipality *models.Municipality) (municipality *models.Municipality, err error) {
@@ -49,6 +50,7 @@ func (service *MunicipalityService) Update(id primitive.ObjectID, updateMunicipa
 
 	update := bson.M{"$set": bson.M{
 		"riskLevel": updateMunicipality.RiskLevel,
+		"geoData":   updateMunicipality.GeoData,
 	}}
 
 	err = collections.GetMunicipalityCollection(*mongoClient).FindOneAndUpdate(service.C, filter, update, options.FindOneAndUpdate().SetReturnDocument(options.After)).Decode(&municipality)
