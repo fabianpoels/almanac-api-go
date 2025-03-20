@@ -7,7 +7,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.6.1
 	github.com/spf13/viper v1.19.0
-	gitlab.com/almanac-app/models v0.0.0-20250223201750-56b6ad0eb35b
+	gitlab.com/almanac-app/models v0.0.0-20250316195012-7a93ce92d7a4
 	go.mongodb.org/mongo-driver v1.17.0
 )
 

@@ -33,10 +33,15 @@ const (
 	Severe   SeverityLevel = "severe"
 )
 
-type RiskLevelResponse struct {
+type MunicipalityRiskLevels struct {
 	Minor    models.GeoJSON `json:"minor"`
 	Moderate models.GeoJSON `json:"moderate"`
 	Severe   models.GeoJSON `json:"severe"`
+}
+
+type RiskLevelResponse struct {
+	Governorates   []models.Governorate   `json:"governorates"`
+	Municipalities MunicipalityRiskLevels `json:"municipalities"`
 }
 
 func (service *RiskLevelService) PublicRiskLevels() (response RiskLevelResponse, err error) {
@@ -48,41 +53,74 @@ func (service *RiskLevelService) PublicRiskLevels() (response RiskLevelResponse,
 
 	mongoClient := db.GetDbClient()
 
-	// find municipalities with risk level >= 0
+	// governorates with risklevel >= 0
 	filter := bson.M{"riskLevel": bson.M{"$gte": 0}}
-	cur, err := collections.GetMunicipalityCollection(*mongoClient).Find(service.C, filter, options.Find())
+	cur, err := collections.GetGovernorateCollection(*mongoClient).Find(service.C, filter, options.Find())
 	if err != nil {
 		return response, err
 	}
 
-	municipalities := make([]models.Municipality, 0)
-	err = cur.All(service.C, &municipalities)
+	governorates := make([]models.Governorate, 0)
+	err = cur.All(service.C, &governorates)
 	if err != nil {
 		return response, err
+	}
+
+	governorateRiskLevels := make(map[string]int)
+	for _, gov := range governorates {
+		governorateRiskLevels[gov.OsmID] = gov.RiskLevel
+	}
+
+	// find municipalities with risk level >= 0
+	cur, err = collections.GetMunicipalityCollection(*mongoClient).Find(service.C, filter, options.Find())
+	if err != nil {
+		return response, err
+	}
+
+	allMunicipalities := make([]models.Municipality, 0)
+	err = cur.All(service.C, &allMunicipalities)
+	if err != nil {
+		return response, err
+	}
+
+	// filter municipalities to only include those with different risk levels from their governorates
+	municipalities := make([]models.Municipality, 0)
+	for _, m := range allMunicipalities {
+		if govRiskLevel, exists := governorateRiskLevels[m.GovernorateOsmID]; exists {
+			if m.RiskLevel != govRiskLevel {
+				municipalities = append(municipalities, m)
+			}
+		} else {
+			municipalities = append(municipalities, m)
+		}
 	}
 
 	response = RiskLevelResponse{
-		Minor: models.GeoJSON{
-			Type:     "FeatureCollection",
-			Features: []models.GeoJSONFeature{},
-		},
-		Moderate: models.GeoJSON{
-			Type:     "FeatureCollection",
-			Features: []models.GeoJSONFeature{},
-		},
-		Severe: models.GeoJSON{
-			Type:     "FeatureCollection",
-			Features: []models.GeoJSONFeature{},
+		Governorates: governorates,
+		Municipalities: MunicipalityRiskLevels{
+			Minor: models.GeoJSON{
+				Type:     "FeatureCollection",
+				Features: []models.GeoJSONFeature{},
+			},
+			Moderate: models.GeoJSON{
+				Type:     "FeatureCollection",
+				Features: []models.GeoJSONFeature{},
+			},
+			Severe: models.GeoJSON{
+				Type:     "FeatureCollection",
+				Features: []models.GeoJSONFeature{},
+			},
 		},
 	}
+
 	for _, m := range municipalities {
 		switch m.RiskLevel {
 		case 0:
-			response.Minor.Features = append(response.Minor.Features, m.GeoData.Features...)
+			response.Municipalities.Minor.Features = append(response.Municipalities.Minor.Features, m.GeoData.Features...)
 		case 1:
-			response.Moderate.Features = append(response.Moderate.Features, m.GeoData.Features...)
+			response.Municipalities.Moderate.Features = append(response.Municipalities.Moderate.Features, m.GeoData.Features...)
 		case 2:
-			response.Severe.Features = append(response.Severe.Features, m.GeoData.Features...)
+			response.Municipalities.Severe.Features = append(response.Municipalities.Severe.Features, m.GeoData.Features...)
 		}
 	}
 

@@ -26,6 +26,10 @@ func GetMunicipalityCollection(client mongo.Client) *mongo.Collection {
 	return getCollection("municipalities", client)
 }
 
+func GetGovernorateCollection(client mongo.Client) *mongo.Collection {
+	return getCollection("governorates", client)
+}
+
 func GetRiskLevelCollection(client mongo.Client) *mongo.Collection {
 	return getCollection("riskLevels", client)
 }

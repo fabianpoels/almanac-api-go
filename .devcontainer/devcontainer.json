@@ -24,10 +24,10 @@
         }
     },
     "forwardPorts": [
-        8080, // Your API port
+        8080, // API
         27017, // MongoDB
         6379 // Redis
     ],
-    "postCreateCommand": "go mod download",
+    "postCreateCommand": "go mod download && go install -v golang.org/x/tools/gopls@latest && go install -v github.com/go-delve/delve/cmd/dlv@latest",
     "remoteUser": "vscode"
 }

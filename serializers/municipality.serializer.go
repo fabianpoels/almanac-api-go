@@ -6,11 +6,12 @@ import (
 )
 
 type MunicipalityResponse struct {
-	Id        primitive.ObjectID     `json:"id"`
-	Name      models.TranslatedField `json:"name"`
-	RiskLevel int                    `json:"riskLevel"`
-	GeoData   models.GeoJSON         `json:"geoData" bson:"geoData"`
-	OsmId     any                    `json:"osmId"`
+	Id               primitive.ObjectID     `json:"id"`
+	Name             models.TranslatedField `json:"name"`
+	RiskLevel        int                    `json:"riskLevel"`
+	GeoData          models.GeoJSON         `json:"geoData" bson:"geoData"`
+	OsmId            any                    `json:"osmId"`
+	GovernorateOsmId any                    `json:"governorateOsmId"`
 }
 
 type MunicipalitySerializer struct {
@@ -23,11 +24,12 @@ type MunicipalitiesSerializer struct {
 
 func (ser *MunicipalitySerializer) Response() MunicipalityResponse {
 	response := MunicipalityResponse{
-		Id:        ser.Id,
-		Name:      ser.Name,
-		RiskLevel: ser.RiskLevel,
-		GeoData:   ser.GeoData,
-		OsmId:     ser.OsmID,
+		Id:               ser.Id,
+		Name:             ser.Name,
+		RiskLevel:        ser.RiskLevel,
+		GeoData:          ser.GeoData,
+		OsmId:            ser.OsmID,
+		GovernorateOsmId: ser.GovernorateOsmID,
 	}
 	return response
 }

@@ -50,6 +50,7 @@ func NewRouter() *gin.Engine {
 	// ADMIN CONTROLLERS
 	newsItems := new(admin.NewsItemsController)
 	municipalities := new(admin.MunicipalitiesController)
+	governorates := new(admin.GovernoratesController)
 
 	api := router.Group("api")
 	{
@@ -87,6 +88,11 @@ func NewRouter() *gin.Engine {
 							m.POST("", municipalities.Create)
 							m.PUT("/:id", municipalities.Update)
 							m.DELETE("/:id", municipalities.Delete)
+						}
+						g := admin.Group("governorates")
+						{
+							g.GET("", governorates.List)
+							g.PUT("/:id", governorates.Update)
 						}
 					}
 				}
